@@ -1,0 +1,40 @@
+# 📦 Dependências (O Docker fará o npm install interno)
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-error.log*
+.npm/
+
+# 💾 Dados e Persistência Local (Não queremos levar o DB local para a imagem)
+backend/data/
+*.db
+*.sqlite
+*.csv
+
+# 🔐 Segredos e Configurações Sensíveis
+.env
+.env.local
+frontend/ssl/*.pem
+frontend/ssl/*.key
+
+# ⚙️ IDEs e Sistema Operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# 🧪 Testes e Cobertura
+tests/
+backend/tests/
+coverage/
+.vitest/
+*.test.js
+*.spec.js
+
+# 📝 Documentação e Git
+.git/
+.gitignore
+README.md
+docs/

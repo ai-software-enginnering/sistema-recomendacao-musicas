@@ -1,0 +1,19 @@
+{
+  "name": "songs-recommendation-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "http-server . -p 8080 -c-1",
+    "start": "http-server . -p 8080 -c-1",
+    "lint": "eslint . --ext .js"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "@tensorflow/tfjs-vis": "^1.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "http-server": "^14.1.1"
+  }
+}

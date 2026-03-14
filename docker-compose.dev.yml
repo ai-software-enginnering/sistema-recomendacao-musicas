@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: music-recommend-backend-dev
+    working_dir: /app/backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+    command: npm run dev
+    networks:
+      - app-network
+
+  frontend:
+    image: node:22-alpine
+    container_name: music-recommend-frontend-dev
+    working_dir: /app/frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    command: sh -c "npm install && npx http-server . -p 8080 -c-1"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
