@@ -1,4 +1,4 @@
-# SongsRecomendation
+# Sistema de Recomendação de Músicas com Machine Learning
 
 Sistema de recomendação musical com arquitetura híbrida que combina **busca vetorial no backend** com **reranqueamento neural no frontend**.
 
