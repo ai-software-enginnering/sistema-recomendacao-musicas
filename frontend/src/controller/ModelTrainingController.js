@@ -45,13 +45,14 @@ export class ModelTrainingController {
   #workerApi;
   #songsController;
   #events;
+  #parametersView;
   #cache = new RecommendationCache();
 
   #isTraining = false;
   #isRecommending = false;
   #recommendationRequestId = 0;
 
-  static init({ modelView, userService, apiService, workerApi, songsController, events }) {
+  static init({ modelView, userService, apiService, workerApi, songsController, events, parametersView }) {
     const controller = new ModelTrainingController();
     controller.#modelView = modelView;
     controller.#userService = userService;
@@ -59,6 +60,7 @@ export class ModelTrainingController {
     controller.#workerApi = workerApi;
     controller.#songsController = songsController;
     controller.#events = events;
+    controller.#parametersView = parametersView;
 
     controller.#modelView.registerTrainModelCallback(() => {
       controller.#trainModel();
@@ -68,7 +70,7 @@ export class ModelTrainingController {
       controller.#runRecommendation();
     });
 
-      const toggleBtn = document.getElementById('toggleTfVisorBtn');
+    const toggleBtn = document.getElementById('toggleTfVisorBtn');
     if (toggleBtn) {
       toggleBtn.addEventListener('click', () => {
         if (window.tfvis) {
@@ -83,11 +85,16 @@ export class ModelTrainingController {
       controller.#modelView.updateProgress(progress);
     });
 
-    controller.#events.on('trainingComplete', () => {
+    controller.#events.on('trainingComplete', ({ featureImportance } = {}) => {
       controller.#isTraining = false;
       controller.#modelView.setLoadingState(false, 'train');
       controller.#modelView.updateProgress(100);
       controller.#cache.clear();
+
+      if (Array.isArray(featureImportance) && controller.#parametersView) {
+        controller.#parametersView.renderFeatureImportance(featureImportance);
+      }
+
       console.log('[ModelTrainingController] Treinamento finalizado e cache limpo.');
     });
 

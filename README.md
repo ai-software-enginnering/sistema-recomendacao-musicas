@@ -1,60 +1,152 @@
-# 🎵 Sistema de Recomendação de Músicas
-Este projeto é um sistema de recomendação de músicas avançado que utiliza uma arquitetura híbrida: busca vetorial no backend com ChromaDB e re-ranking neural no frontend com TensorFlow.js. O foco principal é performance, privacidade (treinamento no cliente) e precisão.
+# SongsRecomendation
 
-# 🚀 Principais Funcionalidades
-- Busca Vetorial: Recuperação de candidatos de alta relevância utilizando embeddings no ChromaDB.
-- Re-ranking Neural: Refinamento das recomendações diretamente no navegador com TensorFlow.js.
-- Processamento em Background: Uso de Web Workers para garantir que o treinamento da IA não trave a interface.
-- Visualização em Tempo Real: Integração com TFVisor para monitorar as métricas de treinamento do modelo.
-- Persistência Local: Histórico de curtidas e preferências armazenados de forma segura.
+Sistema de recomendação musical com arquitetura híbrida que combina **busca vetorial no backend** com **reranqueamento neural no frontend**.
 
-# 🏗️ Arquitetura Técnica
-O sistema opera em um fluxo de duas etapas para garantir escalabilidade e personalização:
-- Backend (Recuperação): O Node.js consulta o ChromaDB para encontrar as 50 músicas mais similares aos gostos do usuário com base em distância vetorial.
-- Frontend (Classificação): O navegador recebe os candidatos e utiliza um modelo de rede neural (MLP) treinado localmente para ordenar essas músicas de acordo com o comportamento específico do usuário.
+O projeto foi desenvolvido para demonstrar, de forma prática, como aplicar **machine learning na web** com foco em **modularidade**, **performance**, **personalização local** e **separação de responsabilidades**.
 
-# 🛠️ Stack Tecnológica
-## Backend
-- Node.js & Express: Servidor de API robusto.
-- ChromaDB: Banco de dados vetorial para busca de similaridade.
-- Zod: Validação rigorosa de esquemas e dados.
-## Frontend
-- TensorFlow.js: Motor de inferência e treinamento de redes neurais.
-- Web Workers: Execução de tarefas pesadas em threads separadas.
-- Bootstrap 5: Interface responsiva e moderna.
-- Vanilla JS (ES6+): Arquitetura baseada em módulos e componentes.
+## Visão geral
 
-# 🔧 Configuração e Instalação
-## Pré-requisitos
-- Node.js 18 ou superior.
-- Instância do ChromaDB (Local ou Cloud).
-- Arquivo CSV de músicas (exportado do Spotify).
+A aplicação busca músicas candidatas no backend por meio de uma base vetorial e, em seguida, personaliza a ordem dessas recomendações no navegador com um modelo treinado em **TensorFlow.js**.
 
-## Instalação
-1. Clone o repositório.
-2. Instale as dependências na raiz, no /backend e no /frontend:
+A arquitetura divide o problema em duas etapas:
+
+- **geração de candidatos (músicas)** no backend
+- **classificação personalizada** no frontend
+
+Esse desenho reduz acoplamento, facilita evolução da solução e deixa mais claro o papel de cada camada do sistema.
+
+## Como funciona
+
+1. O usuário seleciona um perfil local na interface
+2. O sistema exibe o catálogo de músicas ou carrega o histórico de músicas já curtidas
+3. O backend retorna músicas candidatas usando busca vetorial
+4. O frontend treina um modelo neural com base nesse histórico
+5. Um **Web Worker** calcula a relevância de cada música candidata
+6. A interface exibe as recomendações reranqueadas por afinidade prevista
+
+## Stack utilizada
+
+### Backend
+- **Node.js**
+- **Express**
+- **ChromaDB**
+
+### Frontend
+- **JavaScript modular (ES Modules)**
+- **TensorFlow.js**
+- **Web Workers**
+- **Bootstrap 5**
+
+## Modelo de machine learning
+
+O reranqueamento usa uma rede neural densa, pequena e eficiente, projetada para rodar no navegador.
+
+### Parâmetros de entrada
+
+O modelo utiliza 10 atributos musicais:
+
+- `danceability`
+- `energy`
+- `loudness`
+- `speechiness`
+- `acousticness`
+- `instrumentalness`
+- `liveness`
+- `valence`
+- `tempo`
+- `popularity`
+
+### Arquitetura da rede
+
+- **Camada de entrada:** 10 features
+- **Camada oculta 1:** 16 neurônios com ReLU
+- **Camada oculta 2:** 8 neurônios com ReLU
+- **Camada de saída:** 1 neurônio com Sigmoid
+
+A saída do modelo é usada como **pontuação de relevância**, que define a ordem final das músicas recomendadas.
+
+## Diferenciais do projeto
+
+- **Arquitetura híbrida**: busca vetorial + reranqueamento neural
+- **Personalização no cliente**: o treino ocorre no navegador
+- **Execução não bloqueante**: o modelo roda em Web Worker
+- **Separação clara de camadas**: services, controllers, views e worker
+- **Aplicação prática de IA na web**
+
+## Estrutura do projeto
+```bash
+SongsRecomendation/
+├── backend/
+│   ├── data/
+│   ├── src/
+│   ├── Dockerfile
+│   └── .env
+├── frontend/
+│   ├── data/
+│   ├── src/
+│   │   ├── controller/
+│   │   ├── events/
+│   │   ├── service/
+│   │   ├── view/
+│   │   │   ├── templates/
+│   │   └── workers/
+│   ├── ssl/
+│   └── index.html
+├── docker-compose.yml
+├── docker-compose.dev.yml
+└── package.json
+```
+
+## Decisões arquiteturais principais
+
+### Busca vetorial para recuperação inicial
+O backend usa ChromaDB para recuperar rapidamente músicas candidatas com base em similaridade.
+
+### Reranqueamento neural no frontend
+O frontend refina a ordem final das recomendações com base no histórico do usuário selecionado.
+
+### Uso de Web Worker
+O treinamento e a predição acontecem fora da thread principal, evitando travamentos da interface.
+
+### Transparência dos parâmetros
+A aplicação exibe os parâmetros usados pelo modelo e pode apresentar o peso relativo aprendido após o treinamento.
+
+## Características do Projeto
+- arquitetura full stack
+- integração entre backend e frontend
+- machine learning aplicado no navegador
+- uso de TensorFlow.js em cenário real
+- recomendação personalizada
+- organização modular de código
+- decisões de performance e UX
+
+## Como executar
+### Requisitos
+- **Node.js 18+**
+- **npm**
+- **Docker** e **Docker Compose** para ambiente containerizado
+- Uma instância do **ChromaDB** disponível
+
+### Execução local
 ```bash
 npm install
-```
-3. Configure as variáveis de ambiente no arquivo .env dentro da pasta /backend.
-
-## Ingestão de Dados
-Para carregar seu catálogo de músicas no banco vetorial:
-```bash
-npm run ingest
-```
-
-## Execução
-Para iniciar o ambiente de desenvolvimento (Backend + Frontend):
-```bash
 npm run dev
 ```
 
-# 📂 Estrutura do Projeto
-- backend/src/ingest: Scripts para processamento de CSV e carga no ChromaDB.
-- backend/src/recommend: Lógica de busca vetorial e extração de features.
-- frontend/src/worker: Lógica da rede neural executada via Web Worker.
-- frontend/src/controller: Controladores para gerenciamento de estado e eventos.
+### Execução com Docker
+```bash
+docker compose up --build
+```
 
-
+### Variáveis de ambiente
+Exemplo no backend:
+**.env**
+```bash
+PORT=3001
+CHROMA_URL=http://localhost:8000
+CHROMA_COLLECTION=songsPORT=3001
+CHROMA_URL=http://localhost:8000
+CHROMA_COLLECTION=songs
+```
+Ajuste os valores conforme o seu ambiente.
 

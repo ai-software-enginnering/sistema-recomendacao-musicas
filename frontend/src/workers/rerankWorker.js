@@ -4,6 +4,18 @@ let model = null;
 
 const FEATURE_SIZE = 10;
 const EPOCHS = 20;
+const FEATURE_NAMES = [
+  'danceability',
+  'energy',
+  'loudness',
+  'speechiness',
+  'acousticness',
+  'instrumentalness',
+  'liveness',
+  'valence',
+  'tempo',
+  'popularity'
+];
 
 function clamp(value, min = 0, max = 1) {
   const n = Number(value);
@@ -67,6 +79,42 @@ function buildNegativeSamples(positiveInputs) {
       return clamp(inverted + noise);
     })
   );
+}
+
+function extractFeatureImportance() {
+  if (!model?.layers?.length) return [];
+
+  try {
+    const firstLayer = model.layers[0];
+    const weights = firstLayer.getWeights();
+
+    if (!weights || weights.length === 0) return [];
+
+    const kernel = weights[0];
+    if (!kernel) return [];
+
+    const matrix = kernel.arraySync();
+
+    const rawImportance = matrix.map((connections, index) => {
+      const absoluteSum = connections.reduce((sum, value) => sum + Math.abs(value), 0);
+      return {
+        feature: FEATURE_NAMES[index],
+        rawWeight: absoluteSum
+      };
+    });
+
+    const total = rawImportance.reduce((sum, item) => sum + item.rawWeight, 0) || 1;
+
+    return rawImportance
+      .map(item => ({
+        feature: item.feature,
+        rawWeight: Number(item.rawWeight.toFixed(6)),
+        percentage: Number(((item.rawWeight / total) * 100).toFixed(2))
+      }))
+      .sort((a, b) => b.percentage - a.percentage);
+  } catch {
+    return [];
+  }
 }
 
 async function trainModel(users = [], user = null) {
@@ -143,9 +191,12 @@ async function trainModel(users = [], user = null) {
       }
     });
 
+    const featureImportance = extractFeatureImportance();
+
     self.postMessage({
       type: 'TRAINING_COMPLETE',
-      userId: selectedUser.id
+      userId: selectedUser.id,
+      featureImportance
     });
   } catch (err) {
     self.postMessage({

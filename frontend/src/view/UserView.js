@@ -2,7 +2,6 @@ import { View } from './View.js';
 
 export class UserView extends View {
   #userSelect = document.querySelector('#userSelect');
-  #userAge = document.querySelector('#userAge');
   #historyList = document.querySelector('#pastPurchasesList');
 
   #template;
@@ -56,10 +55,8 @@ export class UserView extends View {
     }
   }
 
-  renderUserDetails(user) {
-    if (this.#userAge) {
-      this.#userAge.value = user?.age || '';
-    }
+  renderUserDetails() {
+    // idade removida da interface
   }
 
   renderHistory(history) {
@@ -151,7 +148,7 @@ export class UserView extends View {
       if (userId) {
         this.#onUserSelect?.(userId);
       } else {
-        this.renderUserDetails({ age: '' });
+        this.renderUserDetails();
         this.renderHistory([]);
       }
     });

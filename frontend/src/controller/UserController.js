@@ -16,14 +16,12 @@ export class UserController {
   }
 
   #bindEvents() {
-    // Escuta o evento de 'like' vindo do SongsController
     this.#events.onLike(({ user, track }) => {
       const selectedUser = this.#userService.getSelectedUser();
 
-      // Verifica se o like pertence ao usuário atualmente selecionado
       if (selectedUser && Number(selectedUser.id) === Number(user.id)) {
         const added = this.#userService.addTrackToHistory(selectedUser.id, track);
-        
+
         if (added) {
           this.#userView.addToHistory(track);
           this.#events.emit('historyUpdated', { user: selectedUser });
@@ -34,23 +32,19 @@ export class UserController {
   }
 
   #bindViewCallbacks() {
-    // Callback disparado quando o usuário muda a seleção no <select>
     this.#userView.registerUserSelectCallback((userId) => {
       const user = this.#userService.setSelectedUser(userId);
 
       if (!user) {
         this.#clearSelectedUserView();
-        // ✅ Notifica que a seleção foi limpa para resetar o catálogo
         this.#events.emit('userSelected', { user: null });
         return;
       }
 
       this.#renderSelectedUser(user);
-      // ✅ Notifica a troca de usuário (SongsController ouvirá isso para resetar o offset)
       this.#events.emit('userSelected', { user });
     });
 
-    // Callback para remoção de música do histórico
     this.#userView.registerTrackRemoveCallback(({ userId, track }) => {
       if (!userId || !track) return;
 
@@ -71,7 +65,7 @@ export class UserController {
   }
 
   #clearSelectedUserView() {
-    this.#userView.renderUserDetails({ age: '' });
+    this.#userView.renderUserDetails();
     this.#userView.renderHistory([]);
   }
 
@@ -88,7 +82,6 @@ export class UserController {
     const selectedUser = this.#userService.getSelectedUser();
     if (selectedUser) {
       this.#renderSelectedUser(selectedUser);
-      // ✅ Garante o reset do catálogo caso já exista um usuário pré-selecionado (ex: reload)
       this.#events.emit('userSelected', { user: selectedUser });
     }
   }

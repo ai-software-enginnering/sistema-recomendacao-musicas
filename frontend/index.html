@@ -1,211 +1,191 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema de Recomendação de Músicas</title>
-    <meta name="description" content="Sistema de recomendação de músicas com histórico de curtidas, treinamento de modelo e recomendações personalizadas.">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="Sistema de recomendação de músicas com histórico de curtidas, treinamento de modelo e recomendações personalizadas." />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.5.1/dist/tfjs-vis.umd.min.js"></script>
-</head>
-<body class="bg-light">
+  </head>
+  <body class="bg-light">
     <nav class="navbar navbar-dark bg-dark mb-4">
-        <div class="container">
-            <span class="navbar-brand mb-0 h1">🎵 Sistema de Recomendação de Músicas</span>
-        </div>
+      <div class="container">
+        <span class="navbar-brand mb-0 h1">🎵 Sistema de Recomendação de Músicas</span>
+      </div>
     </nav>
 
     <div class="container pb-4">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-primary shadow-sm border-0" role="alert">
-                    <h2 class="h5 mb-3">Como usar</h2>
-                    <p class="mb-2">
-                        Este sistema aprende com as músicas curtidas por um usuário para sugerir novas músicas parecidas com seu perfil.
-                    </p>
-                    <ol class="mb-0 ps-3">
-                        <li>Selecione um usuário.</li>
-                        <li>Curta algumas músicas para montar o histórico.</li>
-                        <li>Clique em <strong>Treinar Modelo</strong> para o sistema aprender o gosto do usuário.</li>
-                        <li>Depois clique em <strong>Gerar Recomendações</strong> para ver sugestões personalizadas.</li>
-                    </ol>
-                </div>
-            </div>
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="alert alert-primary shadow-sm border-0" role="alert">
+            <h2 class="h5 mb-3">Como usar</h2>
+            <p class="mb-2">Este sistema aprende com as músicas curtidas por um usuário para sugerir novas músicas parecidas com seu perfil.</p>
+            <ol class="mb-0 ps-3">
+              <li>Selecione um usuário.</li>
+              <li>Curta algumas músicas para montar o histórico.</li>
+              <li>
+                Clique em <strong>Treinar Modelo</strong> para o sistema aprender o gosto do usuário.
+              </li>
+              <li>
+                Depois clique em <strong>Gerar Recomendações</strong> para ver sugestões personalizadas.
+              </li>
+            </ol>
+          </div>
         </div>
+      </div>
 
-        <div class="row g-4">
-            <aside class="col-lg-4">
-                <div class="card shadow-sm mb-4 border-0">
-                    <div class="card-body">
-                        <h2 class="h5 card-title mb-3">👤 Perfil do Usuário</h2>
+      <div class="row g-4">
 
-                        <label for="userSelect" class="form-label fw-semibold">Selecione um usuário</label>
-                        <select id="userSelect" class="form-select mb-3" aria-describedby="userHelp">
-                            <option value="">Selecione um usuário...</option>
-                        </select>
-                        <div id="userHelp" class="form-text mb-3">
-                            Escolha o usuário que receberá o treinamento e as recomendações.
-                        </div>
+        <aside class="col-lg-4">
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+            <h2 class="h5 card-title mb-3">Perfil do Usuário</h2>
 
-                        <label for="userAge" class="form-label fw-semibold">Idade</label>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text">Idade</span>
-                            <input
-                                type="text"
-                                id="userAge"
-                                class="form-control"
-                                readonly
-                                placeholder="Será preenchida ao selecionar"
-                                aria-label="Idade do usuário selecionado"
-                            >
-                        </div>
+            <label for="userSelect" class="form-label fw-semibold">Selecione um usuário</label>
+            <select id="userSelect" class="form-select mb-3" aria-describedby="userHelp">
+                <option value="">Selecione um usuário...</option>
+            </select>
 
-                        <div class="alert alert-secondary small mb-0" role="note">
-                            <strong>Importante:</strong> as músicas curtidas por este usuário serão usadas como base para o treinamento.
-                        </div>
-                    </div>
-                </div>
+            <div id="userHelp" class="form-text mb-3">
+                Escolha o usuário que receberá o treinamento e as recomendações.
+            </div>
 
-                <div class="card shadow-sm mb-4 border-0">
-                    <div class="card-body">
-                        <h2 class="h5 card-title mb-3">🧠 Ações do Modelo</h2>
-
-                        <div class="mb-3">
-                            <div class="border rounded p-3 mb-3 bg-light">
-                                <h3 class="h6 mb-2">1. Treinar Modelo</h3>
-                                <p class="small text-muted mb-2">
-                                    Use esta ação depois que o usuário já tiver curtido algumas músicas.
-                                </p>
-                                <p class="small mb-0">
-                                    <strong>O que isso faz:</strong> o sistema analisa o histórico de curtidas para aprender o padrão de preferência do usuário.
-                                </p>
-                            </div>
-
-                            <button id="trainModelBtn" class="btn btn-primary w-100 mb-3" type="button">
-                                Treinar Modelo
-                            </button>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="border rounded p-3 mb-3 bg-light">
-                                <h3 class="h6 mb-2">2. Gerar Recomendações</h3>
-                                <p class="small text-muted mb-2">
-                                    Recomendado usar esta ação após treinar o modelo.
-                                </p>
-                                <p class="small mb-0">
-                                    <strong>O que isso faz:</strong> o sistema busca músicas parecidas com o perfil aprendido e mostra sugestões no painel principal.
-                                </p>
-                            </div>
-
-                            <button id="runRecommendBtn" class="btn btn-success w-100" type="button">
-                                Gerar Recomendações
-                            </button>
-                        </div>
-
-                        <hr>
-
-                        <div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="fw-semibold">Progresso do treinamento</small>
-                                <small id="progressText" class="text-muted" aria-live="polite">Aguardando...</small>
-                            </div>
-                            <div class="progress mt-2" style="height: 10px;">
-                                <div
-                                    id="trainingProgress"
-                                    class="progress-bar progress-bar-striped progress-bar-animated"
-                                    role="progressbar"
-                                    aria-valuemin="0"
-                                    aria-valuemax="100"
-                                    aria-valuenow="0"
-                                    style="width: 0%;"
-                                ></div>
-                            </div>
-                            <div class="form-text mt-2">
-                                O progresso será atualizado durante o treinamento.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h2 class="h5 card-title mb-3">📜 Histórico de Curtidas</h2>
-                        <p class="small text-muted">
-                            As músicas curtidas aparecem aqui e são usadas para personalizar as próximas recomendações.
-                        </p>
-
-                        <div
-                            id="pastPurchasesList"
-                            class="list-group list-group-flush"
-                            style="max-height: 400px; overflow-y: auto;"
-                            aria-label="Histórico de músicas curtidas"
-                        >
-                            <p class="text-muted small mb-0">Nenhuma música curtida.</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <main class="col-lg-8" aria-label="Catálogo e recomendações de músicas">
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-body">
-                        <h2 class="h5 mb-2">🎯 O que fazer nesta área</h2>
-                        <p class="mb-2">
-                            Aqui você pode explorar as músicas disponíveis e curtir aquelas que combinam com o usuário selecionado.
-                        </p>
-                        <ul class="mb-0 ps-3">
-                            <li>Curta músicas para montar o histórico do usuário.</li>
-                            <li>Depois treine o modelo.</li>
-                            <li>Em seguida, gere recomendações personalizadas.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                    <div>
-                        <h2 class="h4 mb-1">Explore Músicas</h2>
-                        <p class="text-muted mb-0 small">
-                            Esta área exibe o catálogo disponível e também as recomendações após o processamento.
-                        </p>
-                    </div>
-                    <span class="badge bg-secondary" id="trackCount" aria-label="Quantidade de músicas disponíveis">
-                        Catálogo disponível
-                    </span>
-                </div>
-
-                <div id="loader" class="alert alert-info" role="status" style="display: none;">
-                    Carregando músicas...
-                </div>
-
-                <div id="songsGrid" class="row g-3" aria-live="polite">
-                    <div class="col-12">
-                        <div class="alert alert-light border text-muted mb-0">
-                            Selecione um usuário e comece curtindo algumas músicas para montar o histórico. Depois, treine o modelo e gere recomendações.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-3 d-flex justify-content-center">
-                    <button id="loadMoreBtn" class="btn btn-outline-secondary" type="button" style="display: none;">
-                        Carregar mais
-                    </button>
-                </div>
-            </main>
+            <div class="alert alert-secondary small mb-0" role="note">
+                As músicas curtidas no histórico serão usadas como base para personalizar o modelo.
+            </div>
         </div>
     </div>
 
-    <button
-        id="toggleTfVisorBtn"
-        class="tfvisor-fab"
-        type="button"
-        aria-label="Mostrar ou ocultar gráficos do treinamento"
-        title="Mostrar ou ocultar gráficos do treinamento"
-    >
-        📈 Gráficos
-    </button>
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+            <h2 class="h5 card-title mb-3">Histórico de Curtidas</h2>
+            <div id="pastPurchasesList" class="d-flex flex-column gap-2">
+                <p id="emptyHistoryMessage" class="text-muted small mb-0">
+                    Nenhuma música curtida.
+                </p>
+            </div>
+        </div>
+    </div>
 
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body">
+            <h2 class="h5 card-title mb-3">Ações do Modelo</h2>
+
+            <button id="trainModelBtn" class="btn btn-primary w-100 mb-3">
+                Treinar Modelo
+            </button>
+
+            <button id="runRecommendBtn" class="btn btn-success w-100 mb-3">
+                Gerar Recomendações
+            </button>
+
+            <button id="toggleTfVisorBtn" class="btn btn-outline-secondary w-100 mb-3">
+                Mostrar/Ocultas Gráficos
+            </button>
+
+            <div class="progress mb-2" role="progressbar" aria-label="Progresso do treinamento">
+                <div
+                    id="trainingProgress"
+                    class="progress-bar progress-bar-striped progress-bar-animated"
+                    style="width: 0%;"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="0"
+                ></div>
+            </div>
+
+            <p id="progressText" class="small text-muted mb-0">Progresso: 0%</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border-0">
+    <div class="card-body">
+        <h2 class="h5 card-title mb-3">Parâmetros do Modelo</h2>
+
+        <p class="small text-muted mb-3">
+            O treinamento usa 10 parâmetros musicais como entrada da rede neural.
+            A coluna de peso é preenchida após o treinamento, com base nos pesos aprendidos.
+        </p>
+
+        <div class="mb-3">
+            <h3 class="h6">Arquitetura da rede</h3>
+            <ul class="small ps-3 mb-0">
+                <li>Entrada: 10 neurônios</li>
+                <li>Camada oculta 1: 16 neurônios (ReLU)</li>
+                <li>Camada oculta 2: 8 neurônios (ReLU)</li>
+                <li>Saída: 1 neurônio (Sigmoid)</li>
+            </ul>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Parâmetro</th>
+                        <th>Descrição</th>
+                        <th>Peso</th>
+                    </tr>
+                </thead>
+                <tbody id="modelParametersTableBody">
+                    <tr><td>danceability</td><td>Ritmo e facilidade para dançar</td><td>-</td></tr>
+                    <tr><td>energy</td><td>Intensidade e atividade percebida</td><td>-</td></tr>
+                    <tr><td>loudness</td><td>Volume normalizado</td><td>-</td></tr>
+                    <tr><td>speechiness</td><td>Presença de fala na faixa</td><td>-</td></tr>
+                    <tr><td>acousticness</td><td>Probabilidade de ser acústica</td><td>-</td></tr>
+                    <tr><td>instrumentalness</td><td>Probabilidade de ser instrumental</td><td>-</td></tr>
+                    <tr><td>liveness</td><td>Indício de performance ao vivo</td><td>-</td></tr>
+                    <tr><td>valence</td><td>Positividade emocional da música</td><td>-</td></tr>
+                    <tr><td>tempo</td><td>Andamento normalizado</td><td>-</td></tr>
+                    <tr><td>popularity</td><td>Popularidade normalizada</td><td>-</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-text mt-3">
+            O peso representa uma estimativa relativa baseado nos pesos da primeira camada da rede.
+        </div>
+    </div>
+</div>
+</aside>
+
+        <main class="col-lg-8" aria-label="Catálogo e recomendações de músicas">
+          <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+              <h2 class="h5 mb-2">🎯 O que fazer nesta área</h2>
+              <p class="mb-2">Aqui você pode explorar as músicas disponíveis e curtir aquelas que combinam com o usuário selecionado.</p>
+              <ul class="mb-0 ps-3">
+                <li>Curta músicas para montar o histórico do usuário.</li>
+                <li>Depois treine o modelo.</li>
+                <li>Em seguida, gere recomendações personalizadas.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+              <h2 class="h4 mb-1">Explore Músicas</h2>
+              <p class="text-muted mb-0 small">Esta área exibe o catálogo disponível e também as recomendações após o processamento.</p>
+            </div>
+            <span class="badge bg-secondary" id="trackCount" aria-label="Quantidade de músicas disponíveis">Catálogo disponível</span>
+          </div>
+
+          <div id="loader" class="alert alert-info" role="status" style="display: none;">Carregando músicas...</div>
+
+          <div id="songsGrid" class="row g-3" aria-live="polite">
+            <div class="col-12">
+              <div class="alert alert-light border text-muted mb-0">Selecione um usuário e comece curtindo algumas músicas para montar o histórico. Depois, treine o modelo e gere recomendações.</div>
+            </div>
+          </div>
+
+          <div class="mt-3 d-flex justify-content-center">
+            <button id="loadMoreBtn" class="btn btn-outline-secondary" type="button" style="display: none;">Carregar mais</button>
+          </div>
+        </main>
+      </div>
+    </div>
+    
     <script type="module" src="src/index.js"></script>
-   
-</body>
+  </body>
 </html>

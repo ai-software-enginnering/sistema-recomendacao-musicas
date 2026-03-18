@@ -12,6 +12,7 @@ import { UserView } from './view/UserView.js';
 import { SongsView } from './view/SongsView.js';
 import { ModelView } from './view/ModelView.js';
 import { TFVisorView } from './view/TFVisorView.js';
+import { ParametersView } from './view/ParametersView.js';
 
 import Events from './events/events.js';
 
@@ -21,18 +22,16 @@ const isLocalhost =
 
 const baseUrl = isLocalhost ? 'http://localhost:3001' : '';
 
-// Serviços
 const apiService = new ApiService({ baseUrl });
 const userService = new UserService();
 const songsService = new SongsService({ apiService });
 
-// Views
 const userView = new UserView();
 const songsView = new SongsView();
 const modelView = new ModelView();
 const tfVisorView = new TFVisorView();
+const parametersView = new ParametersView();
 
-// Worker
 const rerankWorker = new Worker(
   new URL('./workers/rerankWorker.js', import.meta.url)
 );
@@ -42,7 +41,6 @@ const workerApi = WorkerController.init({
   events: Events
 });
 
-// Controllers
 TFVisorController.init({
   tfVisorView,
   events: Events
@@ -106,7 +104,8 @@ async function bootstrap() {
       apiService,
       workerApi,
       songsController,
-      events: Events
+      events: Events,
+      parametersView
     });
 
     await userController.renderUsers();
