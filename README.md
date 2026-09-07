@@ -1,30 +1,30 @@
-# Sistema de Recomendação de Músicas com Machine Learning
+# Music Recommendation System with Machine Learning
 
-Sistema de recomendação musical com arquitetura híbrida que combina **busca vetorial no backend** com **reranqueamento neural no frontend**.
+Music recommendation system with a hybrid architecture that combines **vector search on the backend** with **neural reranking on the frontend**.
 
-O projeto foi desenvolvido para demonstrar, de forma prática, como aplicar **machine learning na web** com foco em **modularidade**, **performance**, **personalização local** e **separação de responsabilidades**.
+The project was developed to demonstrate, in a practical way, how to apply machine learning on the web with a focus on modularity, performance, local personalization and separation of responsibilities.
 
-## Visão geral
+## Overview
 
-A aplicação busca músicas candidatas no backend por meio de uma base vetorial e, em seguida, personaliza a ordem dessas recomendações no navegador com um modelo treinado em **TensorFlow.js**.
+The application searches for candidate songs on the backend through a vector database and then personalizes the order of these recommendations in the browser with a model trained in **TensorFlow.js**.
 
-A arquitetura divide o problema em duas etapas:
+The architecture divides the problem into two stages:
 
-- **geração de candidatos (músicas)** no backend
-- **classificação personalizada** no frontend
+- **candidate generation (songs)** on the backend
+- **personalized ranking** on the frontend
 
-Esse desenho reduz acoplamento, facilita evolução da solução e deixa mais claro o papel de cada camada do sistema.
+This design reduces coupling, makes solution evolution easier and makes the role of each system layer clearer.
 
-## Como funciona
+## How it works
 
-1. O usuário seleciona um perfil local na interface
-2. O sistema exibe o catálogo de músicas ou carrega o histórico de músicas já curtidas
-3. O backend retorna músicas candidatas usando busca vetorial
-4. O frontend treina um modelo neural com base nesse histórico
-5. Um **Web Worker** calcula a relevância de cada música candidata
-6. A interface exibe as recomendações reranqueadas por afinidade prevista
+1. The user selects a local profile in the interface
+2. The system displays the song catalog or loads the history of already liked songs
+3. The backend returns candidate songs using vector search
+4. The frontend trains a neural model based on this history
+5. A **Web Worker** calculates the relevance of each candidate song
+6. The interface displays the recommendations reranked by predicted affinity
 
-## Stack utilizada
+## Stack used
 
 ### Backend
 - **Node.js**
@@ -37,13 +37,13 @@ Esse desenho reduz acoplamento, facilita evolução da solução e deixa mais cl
 - **Web Workers**
 - **Bootstrap 5**
 
-## Modelo de machine learning
+## Machine learning model
 
-O reranqueamento usa uma rede neural densa, pequena e eficiente, projetada para rodar no navegador.
+The reranking uses a small, efficient dense neural network, designed to run in the browser.
 
-### Parâmetros de entrada
+### Input parameters
 
-O modelo utiliza 10 atributos musicais:
+The model uses 10 musical attributes:
 
 - `danceability`
 - `energy`
@@ -56,24 +56,24 @@ O modelo utiliza 10 atributos musicais:
 - `tempo`
 - `popularity`
 
-### Arquitetura da rede
+### Network architecture
 
-- **Camada de entrada:** 10 features
-- **Camada oculta 1:** 16 neurônios com ReLU
-- **Camada oculta 2:** 8 neurônios com ReLU
-- **Camada de saída:** 1 neurônio com Sigmoid
+- **Input layer**: 10 features
+- **Hidden layer 1**: 16 neurons with ReLU
+- **Hidden layer 2**: 8 neurons with ReLU
+- **Output layer**: 1 neuron with Sigmoid
 
-A saída do modelo é usada como **pontuação de relevância**, que define a ordem final das músicas recomendadas.
+The model output is used as a relevance score, which defines the final order of the recommended songs.
 
-## Diferenciais do projeto
+## Project highlights
 
-- **Arquitetura híbrida**: busca vetorial + reranqueamento neural
-- **Personalização no cliente**: o treino ocorre no navegador
-- **Execução não bloqueante**: o modelo roda em Web Worker
-- **Separação clara de camadas**: services, controllers, views e worker
-- **Aplicação prática de IA na web**
+- **Hybrid architecture**: vector search + neural reranking
+- **Client-side personalization**: training happens in the browser
+- **Non-blocking execution**: the model runs in a Web Worker
+- **Clear separation of layers**: services, controllers, views and worker
+- **Practical application of AI on the web**
 
-## Estrutura do projeto
+## Project structure
 ```bash
 SongsRecomendation/
 ├── backend/
@@ -97,49 +97,49 @@ SongsRecomendation/
 └── package.json
 ```
 
-## Decisões arquiteturais principais
+## Main architectural decisions
 
-### Busca vetorial para recuperação inicial
-O backend usa ChromaDB para recuperar rapidamente músicas candidatas com base em similaridade.
+### Vector search for initial retrieval
+The backend uses ChromaDB to quickly retrieve candidate songs based on similarity.
 
-### Reranqueamento neural no frontend
-O frontend refina a ordem final das recomendações com base no histórico do usuário selecionado.
+### Neural reranking on the frontend
+The frontend refines the final order of the recommendations based on the history of the selected user.
 
-### Uso de Web Worker
-O treinamento e a predição acontecem fora da thread principal, evitando travamentos da interface.
+### Web Worker usage
+Training and prediction happen outside the main thread, preventing interface freezes.
 
-### Transparência dos parâmetros
-A aplicação exibe os parâmetros usados pelo modelo e pode apresentar o peso relativo aprendido após o treinamento.
+### Parameter transparency
+The application displays the parameters used by the model and can present the relative weight learned after training.
 
-## Características do Projeto
-- arquitetura full stack
-- integração entre backend e frontend
-- machine learning aplicado no navegador
-- uso de TensorFlow.js em cenário real
-- recomendação personalizada
-- organização modular de código
-- decisões de performance e UX
+## Project features
+- full stack architecture
+- backend and frontend integration
+- machine learning applied in the browser
+- TensorFlow.js usage in a real-world scenario
+- personalized recommendation
+- modular code organization
+- performance and UX decisions
 
-## Como executar
-### Requisitos
+## How to run
+### Requirements
 - **Node.js 18+**
 - **npm**
-- **Docker** e **Docker Compose** para ambiente containerizado
-- Uma instância do **ChromaDB** disponível
+- **Docker** and **Docker Compose** for a containerized environment
+- A **ChromaDB** instance available
 
-### Execução local
+### Local execution
 ```bash
 npm install
 npm run dev
 ```
 
-### Execução com Docker
+### Execution with Docker
 ```bash
 docker compose up --build
 ```
 
-### Variáveis de ambiente
-Exemplo no backend:
+### Environment variables
+Example in the backend:
 **.env**
 ```bash
 PORT=3001
@@ -148,5 +148,4 @@ CHROMA_COLLECTION=songsPORT=3001
 CHROMA_URL=http://localhost:8000
 CHROMA_COLLECTION=songs
 ```
-Ajuste os valores conforme o seu ambiente.
-
+Adjust the values according to your environment.
